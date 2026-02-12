@@ -1,0 +1,50 @@
+# ===========================================
+# DevVault Docker Compose
+# ===========================================
+# LOCAL DEV:  docker-compose up --build
+# PRODUCTION: docker-compose --env-file .env.prod up --build
+#             (or set vars in your cloud platform dashboard)
+# ===========================================
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=${PORT:-5000}
+      - NODE_ENV=${NODE_ENV:-development}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_ACCESS_EXPIRY=${JWT_ACCESS_EXPIRY:-15m}
+      - JWT_REFRESH_EXPIRY=${JWT_REFRESH_EXPIRY:-7d}
+      - ENCRYPTION_MASTER_KEY=${ENCRYPTION_MASTER_KEY}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - APP_NAME=${APP_NAME:-DevVault}
+    restart: unless-stopped
+    networks:
+      - devvault-network
+
+  # Frontend Next.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5000/api}
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - devvault-network
+
+networks:
+  devvault-network:
+    driver: bridge
