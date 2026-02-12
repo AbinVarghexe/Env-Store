@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Plus, FolderKey, Trash2, Loader2, ArrowRight } from "lucide-react";
+import { Plus, FolderKey, Loader2, Key, Users, Lock, Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Card, CardContent } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +16,11 @@ import {
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useProjects } from "@/hooks/useProjects";
 import { useAuth } from "@/hooks/useAuth";
+import { StatCard } from "@/components/dashboard/StatCard";
+import { UsageChart } from "@/components/dashboard/UsageChart";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { ProjectCard } from "@/components/dashboard/ProjectCard";
+
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -28,6 +30,13 @@ export default function DashboardPage() {
   const [newDesc, setNewDesc] = useState("");
   const [creating, setCreating] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Derived state for search
+  const filteredProjects = projects.filter(p => 
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    p.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -55,92 +64,112 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl">
+      {/* Background Effect */}
+
+
+      <div className="relative z-10 max-w-[1600px] mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold mb-1">Projects</h1>
+            <h1 className="text-2xl font-bold mb-1">Dashboard Overview</h1>
             <p className="text-[rgb(var(--muted-foreground))] text-sm">
-              Welcome back, {user?.name}. {projects.length} project{projects.length !== 1 ? "s" : ""} total.
+              Welcome back, {user?.name}. Here's what's happening today.
             </p>
           </div>
-          <Button onClick={() => setShowCreate(true)}>
-            <Plus className="h-4 w-4 mr-2" /> New Project
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="relative w-full md:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[rgb(var(--muted-foreground))]" />
+              <Input 
+                placeholder="Search projects..." 
+                className="pl-9 bg-[rgb(var(--card))]"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            <Button onClick={() => setShowCreate(true)} className="bg-[rgb(var(--primary))] hover:bg-[rgb(var(--primary))/0.9]">
+              <Plus className="h-4 w-4 mr-2" /> New Project
+            </Button>
+          </div>
         </div>
 
-        {/* Projects Grid */}
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-[rgb(var(--primary))]" />
+        {/* Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatCard
+            title="Total Secrets"
+            value="1,248"
+            icon={Lock}
+            trend="+12%"
+            trendUp={true}
+            delay={0}
+          />
+          <StatCard
+            title="Active API Keys"
+            value="86"
+            icon={Key}
+            trend="98.5%"
+            trendUp={true}
+            delay={0.1}
+          />
+          <StatCard
+            title="Team Members"
+            value="24"
+            icon={Users}
+            trend="+3"
+            trendUp={true}
+            delay={0.2}
+          />
+        </div>
+
+        {/* Charts & Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[400px]">
+          <div className="lg:col-span-2 h-full">
+            <UsageChart />
           </div>
-        ) : projects.length === 0 ? (
-          <Card className="text-center py-16">
-            <CardContent>
+          <div className="lg:col-span-1 h-full">
+            <RecentActivity />
+          </div>
+        </div>
+
+        {/* Active Projects */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold">Active Projects</h2>
+            <Button variant="ghost" size="sm" asChild>
+              <a href="#" className="text-[rgb(var(--primary))]">See all projects</a>
+            </Button>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="h-8 w-8 animate-spin text-[rgb(var(--primary))]" />
+            </div>
+          ) : filteredProjects.length === 0 ? (
+            <div className="text-center py-20 bg-[rgb(var(--card))]/50 rounded-xl border border-dashed border-[rgb(var(--border))]">
               <FolderKey className="h-12 w-12 text-[rgb(var(--muted-foreground))] mx-auto mb-4 opacity-50" />
-              <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
+              <h3 className="text-lg font-semibold mb-2">No projects found</h3>
               <p className="text-[rgb(var(--muted-foreground))] text-sm mb-6">
-                Create your first project to start managing secrets.
+                {searchQuery ? "Try a different search term." : "Create your first project to get started."}
               </p>
-              <Button onClick={() => setShowCreate(true)}>
-                <Plus className="h-4 w-4 mr-2" /> Create Project
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.map((project, i) => (
-              <motion.div
-                key={project._id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <Card className="group hover:shadow-md transition-all duration-200 hover:border-[rgb(var(--primary))/0.3]">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-[rgb(var(--primary))/0.1] flex items-center justify-center">
-                          <FolderKey className="h-4 w-4 text-[rgb(var(--primary))]" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-sm">{project.name}</h3>
-                          <p className="text-xs text-[rgb(var(--muted-foreground))]">
-                            {project.members?.length || 1} member{(project.members?.length || 1) !== 1 ? "s" : ""}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setDeleteId(project._id);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded hover:bg-red-500/10 text-red-500"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                    {project.description && (
-                      <p className="text-xs text-[rgb(var(--muted-foreground))] mb-3 line-clamp-2">
-                        {project.description}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <Badge variant="secondary" className="text-xs">
-                        {new Date(project.createdAt).toLocaleDateString()}
-                      </Badge>
-                      <Link href={`/dashboard/projects/${project._id}`}>
-                        <Button variant="ghost" size="sm" className="h-7 text-xs">
-                          Open <ArrowRight className="h-3 w-3 ml-1" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        )}
+              {!searchQuery && (
+                <Button onClick={() => setShowCreate(true)}>
+                  <Plus className="h-4 w-4 mr-2" /> Create Project
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProjects.map((project, i) => (
+                <ProjectCard 
+                  key={project._id} 
+                  project={project} 
+                  index={i}
+                  onDelete={setDeleteId}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Create Dialog */}
         <Dialog open={showCreate} onOpenChange={setShowCreate}>
