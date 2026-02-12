@@ -2,55 +2,15 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import {
-  Shield,
-  Lock,
-  Users,
-  Activity,
-  Key,
-  Server,
-  ArrowRight,
-  Check,
-  Github,
-} from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Shield, ArrowRight, Check, Github } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import LiquidChrome from "@/components/LiquidChrome";
 import SplitText from "@/components/SplitText";
-
-const features = [
-  {
-    icon: Lock,
-    title: "AES-256 Encryption",
-    description: "Military-grade encryption for all your secrets. Zero plaintext storage.",
-  },
-  {
-    icon: Users,
-    title: "Team Collaboration",
-    description: "Role-based access control with Owner, Admin, Developer, and Viewer roles.",
-  },
-  {
-    icon: Activity,
-    title: "Audit Logging",
-    description: "Track every secret access, update, and deletion with detailed audit trails.",
-  },
-  {
-    icon: Key,
-    title: "API Access",
-    description: "Secure REST API with JWT and API token authentication for CI/CD pipelines.",
-  },
-  {
-    icon: Server,
-    title: "Multi-Environment",
-    description: "Organize secrets by Development, Staging, Production, or custom environments.",
-  },
-  {
-    icon: Shield,
-    title: "Two-Factor Auth",
-    description: "TOTP-based 2FA for an extra layer of security on your account.",
-  },
-];
+import MagicBento from "@/components/MagicBento";
+import ColorBends from "@/components/ColorBends";
+import LaserFlow from "@/components/LaserFlow";
 
 const plans = [
   {
@@ -58,7 +18,13 @@ const plans = [
     price: "Free",
     period: "",
     description: "For developers taking their first steps with DevVault.",
-    features: ["Up to 3 projects", "1 team member", "All environments", "AES-256 encryption", "Basic audit logs"],
+    features: [
+      "Up to 3 projects",
+      "1 team member",
+      "All environments",
+      "AES-256 encryption",
+      "Basic audit logs",
+    ],
     cta: "Choose Plan",
     highlighted: false,
   },
@@ -67,7 +33,13 @@ const plans = [
     price: "$9,99",
     period: "/m",
     description: "For teams who need more freedom and flexibility.",
-    features: ["Up to 50 projects", "API token access", "Advanced audit trails", "Team collaboration (up to 5 members)", "Priority support"],
+    features: [
+      "Up to 50 projects",
+      "API token access",
+      "Advanced audit trails",
+      "Team collaboration (up to 5 members)",
+      "Priority support",
+    ],
     cta: "Choose Plan",
     highlighted: false,
   },
@@ -76,7 +48,13 @@ const plans = [
     price: "$19,99",
     period: "/m",
     description: "For studios and professional teams working with clients.",
-    features: ["Unlimited projects", "Unlimited team members", "SSO integration", "Dedicated support & SLA", "Custom security policies"],
+    features: [
+      "Unlimited projects",
+      "Unlimited team members",
+      "SSO integration",
+      "Dedicated support & SLA",
+      "Custom security policies",
+    ],
     cta: "Choose Plan",
     highlighted: true,
   },
@@ -96,120 +74,193 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[rgb(var(--background))]">
       {/* Navbar */}
       {/* Navbar */}
-      <nav className="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl z-50 bg-white/[0.05] backdrop-blur-md rounded-full shadow-lg" style={{ border: '1px solid rgba(255, 255, 255, 0.3)' }}>
+      <nav
+        className="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl z-50 bg-white/[0.05] backdrop-blur-md rounded-full shadow-lg"
+        style={{ border: "1px solid rgba(255, 255, 255, 0.3)" }}
+      >
         <div className="px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Shield className="h-6 w-6 text-white" />
-            <span className="text-lg font-bold tracking-tight text-white">DevVault</span>
+            <span className="text-lg font-bold tracking-tight text-white">
+              DevVault
+            </span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+            <a
+              href="#features"
+              className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
+            >
               Features
             </a>
-            <a href="#pricing" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+            <a
+              href="#pricing"
+              className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
+            >
               Pricing
             </a>
             <Link href="/login">
-              <Button variant="ghost" size="sm" className="rounded-full text-white hover:text-white hover:bg-white/10">Log in</Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-full text-white hover:text-white hover:bg-white/10"
+              >
+                Log in
+              </Button>
             </Link>
             <Link href="/register">
-              <Button size="sm" className="rounded-full bg-white text-black hover:bg-gray-200">Start Free</Button>
+              <Button
+                size="sm"
+                className="rounded-full bg-white text-black hover:bg-gray-200"
+              >
+                Start Free
+              </Button>
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative min-h-screen flex items-center justify-center px-6 overflow-visible bg-[#030303] text-white">
-        {/* Background Effect */}
-        <div className="absolute inset-0 z-0" style={{ width: '100%', height: '100%' }}>
-          <LiquidChrome
-            baseColor={[0.1, 0.1, 0.2]}
-            speed={0.3}
-            amplitude={0.3}
-            interactive={true}
-          />
-        </div>
-
-        <div className="relative z-10 max-w-7xl mx-auto w-full pt-20">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={stagger}
-            className="max-w-3xl mx-auto text-center"
+      {/* Hero + Features seamless gradient wrapper */}
+      <div
+        className="relative"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 50% at 100% 0%, rgba(88, 28, 135, 0.5), transparent 60%), radial-gradient(ellipse 80% 50% at 0% 100%, rgba(88, 28, 135, 0.4), transparent 60%), radial-gradient(ellipse 60% 40% at 50% 50%, rgba(109, 40, 217, 0.15), transparent 50%), #030303",
+        }}
+      >
+        {/* Hero */}
+        <section className="relative min-h-screen flex flex-col items-center justify-start px-6 pt-32 pb-24 overflow-visible text-white">
+          {/* Background Effect */}
+          <div
+            className="absolute inset-0 z-0"
+            style={{ width: "100%", height: "100%" }}
           >
-            <motion.div variants={fadeInUp}>
-              <Badge variant="secondary" className="mb-6">
-                🔒 Secure by design
-              </Badge>
-            </motion.div>
-            <div className="mb-6">
-              <SplitText
-                text="Secure your environment variables."
-                className="text-5xl md:text-7xl font-bold tracking-tight block w-full max-w-6xl px-4"
-                delay={50}
-                duration={1.25}
-                ease="power3.out"
-                splitType="words"
-                from={{ opacity: 0, y: 40 }}
-                to={{ opacity: 1, y: 0 }}
-                threshold={0.1}
-                rootMargin="-100px"
-                textAlign="center"
-                tag="h1"
-              />
-              <SplitText
-                text="The right way."
-                className="text-5xl md:text-7xl font-bold tracking-tight block mt-2"
-                delay={50}
-                duration={1.25}
-                ease="power3.out"
-                splitType="words"
-                from={{ opacity: 0, y: 40 }}
-                to={{ opacity: 1, y: 0 }}
-                threshold={0.1}
-                rootMargin="-100px"
-                textAlign="center"
-                tag="h1"
-              />
-            </div>
-            <motion.p
-              variants={fadeInUp}
-              className="text-lg md:text-xl text-[rgb(var(--muted-foreground))] mb-10 max-w-2xl mx-auto"
-            >
-              Store, manage, and deploy secrets securely with AES-256 encryption.
-              Built for developers and teams who care about security.
-            </motion.p>
+            <LiquidChrome
+              baseColor={[0.1, 0.1, 0.2]}
+              speed={0.3}
+              amplitude={0.3}
+              interactive={true}
+            />
+          </div>
+
+          <div className="relative z-30 max-w-7xl mx-auto w-full flex flex-col items-center">
             <motion.div
-              variants={fadeInUp}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
+              initial="hidden"
+              animate="visible"
+              variants={stagger}
+              className="max-w-5xl mx-auto text-center"
             >
-              <Link href="/register">
-                <Button size="lg" className="text-base">
-                  Start Free <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <a href="#features">
-                <Button size="lg" variant="outline" className="text-base">
-                  See Features
-                </Button>
-              </a>
+              <motion.div variants={fadeInUp}>
+                <Badge variant="secondary" className="mb-12">
+                  🔒 Secure by design
+                </Badge>
+              </motion.div>
+              <div className="mb-20 max-w-6xl mix-blend-difference">
+                <SplitText
+                  text="Secure your"
+                  className="text-5xl md:text-7xl font-bold tracking-tight block w-full max-w-6xl px-4"
+                  delay={50}
+                  duration={1.25}
+                  ease="power3.out"
+                  splitType="words"
+                  from={{ opacity: 0, y: 40 }}
+                  to={{ opacity: 1, y: 0 }}
+                  threshold={0.1}
+                  rootMargin="-100px"
+                  textAlign="center"
+                  tag="h1"
+                />
+                <SplitText
+                  text="environment variables"
+                  className="text-5xl md:text-7xl font-bold tracking-tight block w-full max-w-6xl px-4"
+                  delay={50}
+                  duration={1.25}
+                  ease="power3.out"
+                  splitType="words"
+                  from={{ opacity: 0, y: 40 }}
+                  to={{ opacity: 1, y: 0 }}
+                  threshold={0.1}
+                  rootMargin="-100px"
+                  textAlign="center"
+                  tag="h1"
+                />
+                <SplitText
+                  text="The right way."
+                  className="text-5xl md:text-7xl font-bold tracking-tight block mt-2"
+                  delay={50}
+                  duration={1.25}
+                  ease="power3.out"
+                  splitType="words"
+                  from={{ opacity: 0, y: 40 }}
+                  to={{ opacity: 1, y: 0 }}
+                  threshold={0.1}
+                  rootMargin="-100px"
+                  textAlign="center"
+                  tag="h1"
+                />
+              </div>
+              <motion.div
+                variants={fadeInUp}
+                className="relative z-30 flex flex-col sm:flex-row gap-4 justify-center items-center"
+              >
+                <Link href="/register">
+                  <button className="inline-flex items-center justify-center text-base px-8 py-3 rounded-full bg-white text-black hover:bg-gray-200 font-semibold transition-all duration-300 cursor-pointer">
+                    Get Started Free <ArrowRight className="ml-2 h-4 w-4" />
+                  </button>
+                </Link>
+                <a
+                  href="https://github.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <button className="inline-flex items-center justify-center text-base px-8 py-3 rounded-full border border-white/20 text-white hover:bg-white/10 font-semibold transition-all duration-300 cursor-pointer">
+                    <Github className="mr-2 h-4 w-4" /> View on GitHub
+                  </button>
+                </a>
+              </motion.div>
             </motion.div>
-          </motion.div>
+          </div>
 
-          {/* Code Preview Card */}
+          {/* Code Preview Card — overlaps hero bottom into next section */}
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: "50%" }}
             transition={{ delay: 0.6, duration: 0.7 }}
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-3/4 w-full max-w-2xl px-6 z-20"
+            whileHover={{
+              scale: 1.03,
+              y: "-5%",
+              transition: { type: "spring", stiffness: 200, damping: 25 },
+            }}
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-20 cursor-pointer"
           >
-            <Card className="overflow-hidden bg-slate-950 border-slate-800">
+            <motion.div
+              whileHover={{
+                borderColor: "rgba(99, 102, 241, 0.4)",
+                boxShadow:
+                  "0 20px 60px rgba(99, 102, 241, 0.15), 0 0 40px rgba(99, 102, 241, 0.08)",
+              }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden rounded-xl border border-slate-800 bg-slate-950"
+              style={{ borderWidth: "1px", borderStyle: "solid" }}
+            >
               <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-800">
-                <div className="w-3 h-3 rounded-full bg-red-500" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                <div className="w-3 h-3 rounded-full bg-green-500" />
-                <span className="text-xs text-slate-500 ml-2 font-mono">terminal</span>
+                <motion.div
+                  whileHover={{ scale: 1.3 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                  className="w-3 h-3 rounded-full bg-red-500"
+                />
+                <motion.div
+                  whileHover={{ scale: 1.3 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                  className="w-3 h-3 rounded-full bg-yellow-500"
+                />
+                <motion.div
+                  whileHover={{ scale: 1.3 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                  className="w-3 h-3 rounded-full bg-green-500"
+                />
+                <span className="text-xs text-slate-500 ml-2 font-mono">
+                  terminal
+                </span>
               </div>
               <CardContent className="p-6">
                 <pre className="text-sm font-mono text-slate-300 leading-relaxed">
@@ -217,72 +268,124 @@ export default function LandingPage() {
                     <span className="text-slate-500">$ </span>
                     <span className="text-emerald-400">curl</span>
                     <span className="text-slate-400"> -H </span>
-                    <span className="text-amber-300">{'"X-API-Key: dvt_abc123..."'}</span>
+                    <span className="text-amber-300">
+                      {'"X-API-Key: dvt_abc123..."'}
+                    </span>
                     {"\n"}
-                    <span className="text-slate-400">  https://api.devvault.io/secrets/myapp/production</span>
+                    <span className="text-slate-400">
+                      {" "}
+                      https://api.devvault.io/secrets/myapp/production
+                    </span>
                     {"\n\n"}
-                    <span className="text-slate-500">{"{"}</span>
+                    <span className="text-slate-500">{"{"} </span>
                     {"\n"}
-                    <span className="text-indigo-400">  {"\"STRIPE_KEY\""}</span>
+                    <span className="text-indigo-400"> {'"STRIPE_KEY"'}</span>
                     <span className="text-slate-500">: </span>
-                    <span className="text-emerald-300">{'"sk_live_...decrypted"'}</span>
+                    <span className="text-emerald-300">
+                      {'"sk_live_...decrypted"'}
+                    </span>
                     {"\n"}
-                    <span className="text-indigo-400">  {"\"DB_URL\""}</span>
-                    <span className="text-slate-500">:     </span>
-                    <span className="text-emerald-300">{'"mongodb+srv://...decrypted"'}</span>
+                    <span className="text-indigo-400"> {'"DB_URL"'}</span>
+                    <span className="text-slate-500">: </span>
+                    <span className="text-emerald-300">
+                      {'"mongodb+srv://...decrypted"'}
+                    </span>
                     {"\n"}
                     <span className="text-slate-500">{"}"}</span>
                   </code>
                 </pre>
               </CardContent>
-            </Card>
+            </motion.div>
           </motion.div>
-        </div>
-      </section>
+        </section>
 
-      {/* Features */}
-      <section id="features" className="py-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="text-center mb-16"
+        {/* Features */}
+        <section
+          id="features"
+          className="relative pt-64 pb-24 px-6 overflow-hidden"
+        >
+          {/* LaserFlow Background */}
+          <div
+            className="absolute inset-0 z-0"
+            style={{ width: "100%", height: "100%", transform: "scaleY(-1)" }}
           >
-            <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold mb-4">
-              Everything you need to manage secrets
-            </motion.h2>
-            <motion.p variants={fadeInUp} className="text-[rgb(var(--muted-foreground))] text-lg max-w-2xl mx-auto">
-              From encryption to audit logging, DevVault gives you the tools to keep your secrets safe.
-            </motion.p>
-          </motion.div>
+            <LaserFlow
+              color="#1f1f3e"
+              wispDensity={4}
+              flowSpeed={1.2}
+              verticalSizing={5}
+              horizontalSizing={2.2}
+              fogIntensity={2}
+              fogScale={0.45}
+              wispSpeed={23}
+              wispIntensity={10}
+              flowStrength={0.35}
+              decay={3}
+              horizontalBeamOffset={0}
+              verticalBeamOffset={-0.5}
+            />
+          </div>
+          <div className="absolute inset-0 z-0">
+            <ColorBends
+              rotation={45}
+              speed={0.2}
+              colors={["#1a1a33", "#9595ff"]}
+              transparent
+              autoRotate={0.6}
+              scale={1.6}
+              frequency={1}
+              warpStrength={1}
+              mouseInfluence={0.5}
+              parallax={1.3}
+              noise={0.1}
+            />
+          </div>
+          <div className="relative z-10 max-w-7xl mx-auto">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={stagger}
+              className="text-center mb-16"
+            >
+              <motion.h2
+                variants={fadeInUp}
+                className="text-5xl md:text-6xl font-bold mb-4"
+              >
+                Everything you need to
+                <br />
+                manage secrets
+              </motion.h2>
+              <motion.p
+                variants={fadeInUp}
+                className="text-[rgb(var(--muted-foreground))] text-lg max-w-2xl mx-auto"
+              >
+                From encryption to audit logging, DevVault gives you the tools
+                to keep your secrets safe.
+              </motion.p>
+            </motion.div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {features.map((feature) => (
-              <motion.div key={feature.title} variants={fadeInUp}>
-                <Card className="h-full hover:shadow-lg transition-shadow duration-300 group">
-                  <CardContent className="p-6">
-                    <div className="w-10 h-10 rounded-lg bg-[rgb(var(--primary))/0.1] flex items-center justify-center mb-4 group-hover:bg-[rgb(var(--primary))/0.15] transition-colors">
-                      <feature.icon className="h-5 w-5 text-[rgb(var(--primary))]" />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-sm text-[rgb(var(--muted-foreground))] leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+            <div className="w-full">
+              <MagicBento
+                textAutoHide={true}
+                enableStars
+                enableSpotlight
+                enableBorderGlow={true}
+                enableTilt
+                enableMagnetism={false}
+                clickEffect
+                spotlightRadius={750}
+                particleCount={12}
+                glowColor="95, 95, 255"
+                disableAnimations={false}
+              />
+            </div>
+          </div>
+          {/* Bottom Gradient Overlay */}
+          <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-blue-900/50 via-blue-900/10 to-transparent pointer-events-none z-20" />
+        </section>
+      </div>
+      {/* End gradient wrapper */}
 
       {/* How It Works */}
       <section className="py-24 px-6 bg-[rgb(var(--secondary))]">
@@ -294,7 +397,10 @@ export default function LandingPage() {
             variants={stagger}
             className="text-center mb-16"
           >
-            <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold mb-4">
+            <motion.h2
+              variants={fadeInUp}
+              className="text-3xl md:text-4xl font-bold mb-4"
+            >
               Simple. Secure. Fast.
             </motion.h2>
           </motion.div>
@@ -307,16 +413,34 @@ export default function LandingPage() {
             className="grid grid-cols-1 md:grid-cols-3 gap-10"
           >
             {[
-              { step: "01", title: "Create a Project", desc: "Set up your project and choose environments." },
-              { step: "02", title: "Add Secrets", desc: "Store API keys, tokens, and credentials securely." },
-              { step: "03", title: "Access Anywhere", desc: "Use the dashboard or API to retrieve secrets in your pipeline." },
+              {
+                step: "01",
+                title: "Create a Project",
+                desc: "Set up your project and choose environments.",
+              },
+              {
+                step: "02",
+                title: "Add Secrets",
+                desc: "Store API keys, tokens, and credentials securely.",
+              },
+              {
+                step: "03",
+                title: "Access Anywhere",
+                desc: "Use the dashboard or API to retrieve secrets in your pipeline.",
+              },
             ].map((item) => (
-              <motion.div key={item.step} variants={fadeInUp} className="text-center">
+              <motion.div
+                key={item.step}
+                variants={fadeInUp}
+                className="text-center"
+              >
                 <div className="text-5xl font-bold text-[rgb(var(--primary))] mb-4 opacity-30">
                   {item.step}
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                <p className="text-[rgb(var(--muted-foreground))]">{item.desc}</p>
+                <p className="text-[rgb(var(--muted-foreground))]">
+                  {item.desc}
+                </p>
               </motion.div>
             ))}
           </motion.div>
@@ -324,7 +448,10 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="relative py-32 px-6 bg-[#030303] text-white overflow-hidden">
+      <section
+        id="pricing"
+        className="relative py-32 px-6 bg-[#030303] text-white overflow-hidden"
+      >
         {/* Background watermark text */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
           <span className="text-[12rem] md:text-[16rem] font-black text-white/[0.03] tracking-tighter leading-none">
@@ -343,10 +470,16 @@ export default function LandingPage() {
             variants={stagger}
             className="text-center mb-16"
           >
-            <motion.p variants={fadeInUp} className="text-sm text-gray-400 uppercase tracking-widest mb-3">
+            <motion.p
+              variants={fadeInUp}
+              className="text-sm text-gray-400 uppercase tracking-widest mb-3"
+            >
               DevVault
             </motion.p>
-            <motion.h2 variants={fadeInUp} className="text-4xl md:text-6xl font-bold mb-4 tracking-tight">
+            <motion.h2
+              variants={fadeInUp}
+              className="text-4xl md:text-6xl font-bold mb-4 tracking-tight"
+            >
               Pricing
             </motion.h2>
             <motion.p variants={fadeInUp} className="text-gray-400 text-lg">
@@ -374,18 +507,24 @@ export default function LandingPage() {
                 <div className="h-full rounded-2xl bg-white/[0.04] backdrop-blur-xl p-8 flex flex-col">
                   {/* Plan label */}
                   <div className="mb-1">
-                    <span className={`text-sm font-medium ${
-                      plan.highlighted ? "text-blue-400" : "text-gray-400"
-                    }`}>
+                    <span
+                      className={`text-sm font-medium ${
+                        plan.highlighted ? "text-blue-400" : "text-gray-400"
+                      }`}
+                    >
                       {plan.name}
                     </span>
                   </div>
 
                   {/* Price */}
                   <div className="mb-4">
-                    <span className="text-4xl font-bold text-white">{plan.price}</span>
+                    <span className="text-4xl font-bold text-white">
+                      {plan.price}
+                    </span>
                     {plan.period && (
-                      <span className="text-lg text-gray-400">{plan.period}</span>
+                      <span className="text-lg text-gray-400">
+                        {plan.period}
+                      </span>
                     )}
                   </div>
 
@@ -397,7 +536,10 @@ export default function LandingPage() {
                   {/* Features */}
                   <ul className="space-y-4 mb-8 flex-1">
                     {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3 text-sm text-gray-300">
+                      <li
+                        key={feature}
+                        className="flex items-start gap-3 text-sm text-gray-300"
+                      >
                         <Check className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
                         <span>{feature}</span>
                       </li>
@@ -406,11 +548,13 @@ export default function LandingPage() {
 
                   {/* CTA */}
                   <Link href="/register" className="mt-auto">
-                    <button className={`w-full py-3 rounded-full text-sm font-medium transition-all duration-300 cursor-pointer ${
-                      plan.highlighted
-                        ? "bg-white text-black hover:bg-gray-200"
-                        : "border border-white/20 text-white hover:bg-white/10"
-                    }`}>
+                    <button
+                      className={`w-full py-3 rounded-full text-sm font-medium transition-all duration-300 cursor-pointer ${
+                        plan.highlighted
+                          ? "bg-white text-black hover:bg-gray-200"
+                          : "border border-white/20 text-white hover:bg-white/10"
+                      }`}
+                    >
                       {plan.cta}
                     </button>
                   </Link>
