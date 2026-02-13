@@ -33,10 +33,10 @@ services:
   # Frontend Next.js
   frontend:
     build:
-      context: ./frontend
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000/api}
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/devvault-frontend:latest
     ports:
       - "3000:3000"
     environment:
