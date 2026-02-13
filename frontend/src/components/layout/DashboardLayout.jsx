@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { Sidebar } from "./Sidebar";
+import { UserMenu } from "./UserMenu";
 
 export function DashboardLayout({ children }) {
   const { user, loading } = useAuth();
@@ -21,9 +22,16 @@ export function DashboardLayout({ children }) {
   return (
     <div className="min-h-screen bg-[rgb(var(--background))]">
       <Sidebar />
-      <main className="ml-[250px] p-8 transition-all duration-300">
-        {children}
-      </main>
+      <div className="ml-[250px] min-h-screen flex flex-col">
+        {/* Top Header */}
+        <header className="sticky top-0 z-40 flex h-16 items-center justify-end px-8 border-b border-white/5 bg-[rgb(var(--background))]/80 backdrop-blur-md">
+          <UserMenu />
+        </header>
+
+        <main className="flex-1 p-8 transition-all duration-300">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

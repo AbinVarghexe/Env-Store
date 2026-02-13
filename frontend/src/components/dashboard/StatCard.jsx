@@ -1,9 +1,4 @@
-"use client";
-
-import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/Card";
-import gsap from "gsap";
 import { cn } from "@/lib/utils";
 
 export function StatCard({
@@ -12,82 +7,46 @@ export function StatCard({
   icon: Icon,
   trend,
   trendUp,
+  className,
   delay = 0,
 }) {
-  const valueRef = useRef(null);
-
-  useEffect(() => {
-    const el = valueRef.current;
-    if (!el) return;
-
-    // cleanup previous animation if any (though unlikely in this simple case)
-    gsap.killTweensOf(el);
-
-    // Use a proxy object for the counter
-    const proxy = { val: 0 };
-    const numericValue =
-      parseInt(String(value).replace(/[^0-9]/g, ""), 10) || 0;
-
-    gsap.fromTo(
-      proxy,
-      { val: 0 },
-      {
-        val: numericValue,
-        duration: 2,
-        ease: "power2.out",
-        onUpdate: () => {
-          if (el) {
-            el.innerText = Math.ceil(proxy.val).toLocaleString();
-          }
-        },
-      },
-    );
-  }, [value]);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      whileHover={{ y: -5 }}
+      className={cn(
+        "relative overflow-hidden rounded-xl border border-white/5 bg-[#1a1b26] p-6 shadow-xl",
+        className,
+      )}
     >
-      <Card className="overflow-hidden border-t-4 border-t-[rgb(var(--primary))] bg-[rgb(var(--card))] shadow-sm hover:shadow-md transition-shadow duration-300">
-        <CardContent className="p-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-[rgb(var(--muted-foreground))] mb-1">
-                {title}
-              </p>
-              <h3
-                ref={valueRef}
-                className="text-3xl font-bold text-[rgb(var(--foreground))]"
-              >
-                0
-              </h3>
-            </div>
-            <div className="p-3 bg-[rgb(var(--primary))/0.1] rounded-xl">
-              <Icon className="h-6 w-6 text-[rgb(var(--primary))]" />
-            </div>
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm font-medium text-slate-400">{title}</p>
+          <div className="mt-2 flex items-baseline gap-2">
+            <h3 className="text-3xl font-bold text-white">{value}</h3>
           </div>
           {trend && (
-            <div className="mt-4 flex items-center text-xs font-medium">
+            <div className="mt-2 flex items-center gap-2">
               <span
                 className={cn(
-                  "flex items-center gap-1 px-2 py-0.5 rounded-full bg-opacity-20",
-                  trendUp
-                    ? "text-emerald-500 bg-emerald-500/10"
-                    : "text-rose-500 bg-rose-500/10",
+                  "text-xs font-medium",
+                  trendUp ? "text-emerald-400" : "text-rose-400",
                 )}
               >
                 {trend}
               </span>
-              <span className="ml-2 text-[rgb(var(--muted-foreground))]">
-                from last month
-              </span>
+              <span className="text-xs text-slate-500">from last month</span>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+        <div className={cn("rounded-lg p-2.5", "bg-white/5 text-white")}>
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
+
+      {/* Background Gradient Glow */}
+      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-blue-500/10 blur-2xl transition-all duration-500 group-hover:bg-blue-500/20" />
     </motion.div>
   );
 }

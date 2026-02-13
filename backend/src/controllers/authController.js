@@ -1,12 +1,12 @@
-const bcrypt = require('bcryptjs');
-const User = require('../models/User');
+const bcrypt = require("bcryptjs");
+const User = require("../models/User");
 const {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
-} = require('../services/tokenService');
-const { generateSecret, verifyToken } = require('../services/twoFactor');
-const { createAuditLog } = require('../middleware/auditLogger');
+} = require("../services/tokenService");
+const { generateSecret, verifyToken } = require("../services/twoFactor");
+const { createAuditLog } = require("../middleware/auditLogger");
 
 const register = async (req, res, next) => {
   try {
@@ -14,7 +14,7 @@ const register = async (req, res, next) => {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ error: 'Email already registered' });
+      return res.status(409).json({ error: "Email already registered" });
     }
 
     const salt = await bcrypt.genSalt(12);
@@ -30,8 +30,8 @@ const register = async (req, res, next) => {
 
     await createAuditLog({
       userId: user._id,
-      action: 'auth.register',
-      resourceType: 'user',
+      action: "auth.register",
+      resourceType: "user",
       resourceId: user._id,
       ip: req.ip,
     });
@@ -50,32 +50,37 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).select('+passwordHash +twoFactorSecret +twoFactorEnabled');
+    const user = await User.findOne({ email }).select(
+      "+passwordHash +twoFactorSecret +twoFactorEnabled",
+    );
     if (!user) {
       await createAuditLog({
         userId: null,
-        action: 'auth.login.failed',
-        metadata: { email, reason: 'user_not_found' },
+        action: "auth.login.failed",
+        metadata: { email, reason: "user_not_found" },
         ip: req.ip,
       });
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
       await createAuditLog({
         userId: user._id,
-        action: 'auth.login.failed',
-        resourceType: 'user',
+        action: "auth.login.failed",
+        resourceType: "user",
         resourceId: user._id,
-        metadata: { reason: 'invalid_password' },
+        metadata: { reason: "invalid_password" },
         ip: req.ip,
       });
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     if (user.twoFactorEnabled) {
-      const tempToken = generateAccessToken({ userId: user._id, twoFactorPending: true });
+      const tempToken = generateAccessToken({
+        userId: user._id,
+        twoFactorPending: true,
+      });
       return res.json({
         requiresTwoFactor: true,
         tempToken,
@@ -90,8 +95,8 @@ const login = async (req, res, next) => {
 
     await createAuditLog({
       userId: user._id,
-      action: 'auth.login',
-      resourceType: 'user',
+      action: "auth.login",
+      resourceType: "user",
       resourceId: user._id,
       ip: req.ip,
     });
@@ -109,15 +114,15 @@ const login = async (req, res, next) => {
 const loginTwoFactor = async (req, res, next) => {
   try {
     const { token: totpCode } = req.body;
-    const user = await User.findById(req.user._id).select('+twoFactorSecret');
+    const user = await User.findById(req.user._id).select("+twoFactorSecret");
 
     if (!user || !user.twoFactorEnabled) {
-      return res.status(400).json({ error: '2FA is not enabled' });
+      return res.status(400).json({ error: "2FA is not enabled" });
     }
 
     const isValid = verifyToken(user.twoFactorSecret, totpCode);
     if (!isValid) {
-      return res.status(401).json({ error: 'Invalid 2FA code' });
+      return res.status(401).json({ error: "Invalid 2FA code" });
     }
 
     const accessToken = generateAccessToken({ userId: user._id });
@@ -140,14 +145,14 @@ const refreshAccessToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) {
-      return res.status(400).json({ error: 'Refresh token required' });
+      return res.status(400).json({ error: "Refresh token required" });
     }
 
     const decoded = verifyRefreshToken(refreshToken);
     const user = await User.findById(decoded.userId);
 
     if (!user || user.refreshToken !== refreshToken) {
-      return res.status(401).json({ error: 'Invalid refresh token' });
+      return res.status(401).json({ error: "Invalid refresh token" });
     }
 
     const newAccessToken = generateAccessToken({ userId: user._id });
@@ -161,7 +166,7 @@ const refreshAccessToken = async (req, res, next) => {
       refreshToken: newRefreshToken,
     });
   } catch (error) {
-    return res.status(401).json({ error: 'Invalid refresh token' });
+    return res.status(401).json({ error: "Invalid refresh token" });
   }
 };
 
@@ -170,7 +175,7 @@ const setupTwoFactor = async (req, res, next) => {
     const user = await User.findById(req.user._id);
 
     if (user.twoFactorEnabled) {
-      return res.status(400).json({ error: '2FA is already enabled' });
+      return res.status(400).json({ error: "2FA is already enabled" });
     }
 
     const { secret, qrCodeDataUrl } = await generateSecret(user.email);
@@ -190,15 +195,15 @@ const setupTwoFactor = async (req, res, next) => {
 const verifyAndEnableTwoFactor = async (req, res, next) => {
   try {
     const { token: totpCode } = req.body;
-    const user = await User.findById(req.user._id).select('+twoFactorSecret');
+    const user = await User.findById(req.user._id).select("+twoFactorSecret");
 
     if (!user.twoFactorSecret) {
-      return res.status(400).json({ error: 'Set up 2FA first' });
+      return res.status(400).json({ error: "Set up 2FA first" });
     }
 
     const isValid = verifyToken(user.twoFactorSecret, totpCode);
     if (!isValid) {
-      return res.status(400).json({ error: 'Invalid verification code' });
+      return res.status(400).json({ error: "Invalid verification code" });
     }
 
     user.twoFactorEnabled = true;
@@ -206,13 +211,13 @@ const verifyAndEnableTwoFactor = async (req, res, next) => {
 
     await createAuditLog({
       userId: user._id,
-      action: 'auth.2fa.enable',
-      resourceType: 'user',
+      action: "auth.2fa.enable",
+      resourceType: "user",
       resourceId: user._id,
       ip: req.ip,
     });
 
-    return res.json({ message: '2FA enabled successfully' });
+    return res.json({ message: "2FA enabled successfully" });
   } catch (error) {
     return next(error);
   }
@@ -221,15 +226,15 @@ const verifyAndEnableTwoFactor = async (req, res, next) => {
 const disableTwoFactor = async (req, res, next) => {
   try {
     const { token: totpCode } = req.body;
-    const user = await User.findById(req.user._id).select('+twoFactorSecret');
+    const user = await User.findById(req.user._id).select("+twoFactorSecret");
 
     if (!user.twoFactorEnabled) {
-      return res.status(400).json({ error: '2FA is not enabled' });
+      return res.status(400).json({ error: "2FA is not enabled" });
     }
 
     const isValid = verifyToken(user.twoFactorSecret, totpCode);
     if (!isValid) {
-      return res.status(400).json({ error: 'Invalid verification code' });
+      return res.status(400).json({ error: "Invalid verification code" });
     }
 
     user.twoFactorEnabled = false;
@@ -238,13 +243,13 @@ const disableTwoFactor = async (req, res, next) => {
 
     await createAuditLog({
       userId: user._id,
-      action: 'auth.2fa.disable',
-      resourceType: 'user',
+      action: "auth.2fa.disable",
+      resourceType: "user",
       resourceId: user._id,
       ip: req.ip,
     });
 
-    return res.json({ message: '2FA disabled successfully' });
+    return res.json({ message: "2FA disabled successfully" });
   } catch (error) {
     return next(error);
   }
@@ -259,6 +264,29 @@ const getMe = async (req, res, next) => {
   }
 };
 
+const searchUsers = async (req, res, next) => {
+  try {
+    const { query } = req.query;
+    if (!query || query.length < 2) {
+      return res.json({ users: [] });
+    }
+
+    const users = await User.find({
+      $or: [
+        { email: { $regex: query, $options: "i" } },
+        { name: { $regex: query, $options: "i" } },
+      ],
+      _id: { $ne: req.user._id }, // Exclude self
+    })
+      .select("name email")
+      .limit(5);
+
+    return res.json({ users });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -268,4 +296,5 @@ module.exports = {
   verifyAndEnableTwoFactor,
   disableTwoFactor,
   getMe,
+  searchUsers,
 };

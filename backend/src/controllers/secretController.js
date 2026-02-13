@@ -1,6 +1,6 @@
-const Secret = require('../models/Secret');
-const { encrypt, decrypt } = require('../services/encryption');
-const { createAuditLog } = require('../middleware/auditLogger');
+const Secret = require("../models/Secret");
+const { encrypt, decrypt } = require("../services/encryption");
+const { createAuditLog } = require("../middleware/auditLogger");
 
 const listSecrets = async (req, res, next) => {
   try {
@@ -8,7 +8,7 @@ const listSecrets = async (req, res, next) => {
       projectId: req.params.projectId,
       environmentId: req.params.envId,
     })
-      .select('-encryptedValue -iv -authTag')
+      .select("-encryptedValue -iv -authTag")
       .sort({ key: 1 });
 
     return res.json({ secrets });
@@ -28,7 +28,9 @@ const createSecret = async (req, res, next) => {
     });
 
     if (existing) {
-      return res.status(409).json({ error: `Secret with key "${key}" already exists` });
+      return res
+        .status(409)
+        .json({ error: `Secret with key "${key}" already exists` });
     }
 
     const { encryptedValue, iv, authTag } = encrypt(value);
@@ -46,10 +48,14 @@ const createSecret = async (req, res, next) => {
 
     await createAuditLog({
       userId: req.user._id,
-      action: 'secret.create',
-      resourceType: 'secret',
+      action: "secret.create",
+      resourceType: "secret",
       resourceId: secret._id,
-      metadata: { key, projectId: req.params.projectId, environmentId: req.params.envId },
+      metadata: {
+        key,
+        projectId: req.params.projectId,
+        environmentId: req.params.envId,
+      },
       ip: req.ip,
     });
 
@@ -79,7 +85,7 @@ const updateSecret = async (req, res, next) => {
     });
 
     if (!secret) {
-      return res.status(404).json({ error: 'Secret not found' });
+      return res.status(404).json({ error: "Secret not found" });
     }
 
     const { encryptedValue, iv, authTag } = encrypt(value);
@@ -92,8 +98,8 @@ const updateSecret = async (req, res, next) => {
 
     await createAuditLog({
       userId: req.user._id,
-      action: 'secret.update',
-      resourceType: 'secret',
+      action: "secret.update",
+      resourceType: "secret",
       resourceId: secret._id,
       metadata: { key: secret.key, newVersion: secret.version },
       ip: req.ip,
@@ -121,19 +127,19 @@ const deleteSecret = async (req, res, next) => {
     });
 
     if (!secret) {
-      return res.status(404).json({ error: 'Secret not found' });
+      return res.status(404).json({ error: "Secret not found" });
     }
 
     await createAuditLog({
       userId: req.user._id,
-      action: 'secret.delete',
-      resourceType: 'secret',
+      action: "secret.delete",
+      resourceType: "secret",
       resourceId: secret._id,
       metadata: { key: secret.key },
       ip: req.ip,
     });
 
-    return res.json({ message: 'Secret deleted successfully' });
+    return res.json({ message: "Secret deleted successfully" });
   } catch (error) {
     return next(error);
   }
@@ -148,7 +154,7 @@ const revealSecret = async (req, res, next) => {
     });
 
     if (!secret) {
-      return res.status(404).json({ error: 'Secret not found' });
+      return res.status(404).json({ error: "Secret not found" });
     }
 
     const decryptedValue = decrypt({
@@ -159,8 +165,8 @@ const revealSecret = async (req, res, next) => {
 
     await createAuditLog({
       userId: req.user._id,
-      action: 'secret.reveal',
-      resourceType: 'secret',
+      action: "secret.reveal",
+      resourceType: "secret",
       resourceId: secret._id,
       metadata: { key: secret.key },
       ip: req.ip,
@@ -176,10 +182,52 @@ const revealSecret = async (req, res, next) => {
   }
 };
 
+const downloadSecrets = async (req, res, next) => {
+  try {
+    const secrets = await Secret.find({
+      projectId: req.params.projectId,
+      environmentId: req.params.envId,
+    }).sort({ key: 1 });
+
+    if (secrets.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "No secrets found for this environment" });
+    }
+
+    const envContent = secrets
+      .map((secret) => {
+        const decryptedValue = decrypt({
+          encryptedValue: secret.encryptedValue,
+          iv: secret.iv,
+          authTag: secret.authTag,
+        });
+        return `${secret.key}=${decryptedValue}`;
+      })
+      .join("\n");
+
+    await createAuditLog({
+      userId: req.user._id,
+      action: "secret.download_env",
+      resourceType: "environment",
+      resourceId: req.params.envId,
+      metadata: { projectId: req.params.projectId, count: secrets.length },
+      ip: req.ip,
+    });
+
+    res.setHeader("Content-Type", "text/plain");
+    res.setHeader("Content-Disposition", `attachment; filename=.env`);
+    return res.send(envContent);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   listSecrets,
   createSecret,
   updateSecret,
   deleteSecret,
   revealSecret,
+  downloadSecrets,
 };

@@ -2,30 +2,70 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Activity, ShieldAlert, Key, Edit, Trash, Plus } from "lucide-react";
+import {
+  Activity,
+  ShieldAlert,
+  Key,
+  Edit,
+  Trash,
+  Plus,
+  Eye,
+  RefreshCw,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import api from "@/lib/api";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-const actionIcons = {
-  CREATE_SECRET: Plus,
-  READ_SECRET: Key,
-  UPDATE_SECRET: Edit,
-  DELETE_SECRET: Trash,
-  CREATE_PROJECT: Plus,
-  DELETE_PROJECT: Trash,
-  generate_token: Key,
-  revoke_token: ShieldAlert,
-  login: Activity,
-  login_failed: ShieldAlert,
-};
-
-const actionColors = {
-  CREATE_SECRET: "bg-emerald-500/10 text-emerald-500",
-  READ_SECRET: "bg-blue-500/10 text-blue-500",
-  UPDATE_SECRET: "bg-amber-500/10 text-amber-500",
-  DELETE_SECRET: "bg-red-500/10 text-red-500",
-  login_failed: "bg-red-500/10 text-red-500",
+const actionConfig = {
+  "secret.create": {
+    icon: Plus,
+    color: "text-emerald-400",
+    bg: "bg-emerald-400/10",
+  },
+  "secret.read": { icon: Eye, color: "text-blue-400", bg: "bg-blue-400/10" },
+  "secret.update": {
+    icon: Edit,
+    color: "text-amber-400",
+    bg: "bg-amber-400/10",
+  },
+  "secret.delete": {
+    icon: Trash,
+    color: "text-rose-400",
+    bg: "bg-rose-400/10",
+  },
+  "secret.reveal": {
+    icon: Eye,
+    color: "text-purple-400",
+    bg: "bg-purple-400/10",
+  },
+  "project.create": {
+    icon: Plus,
+    color: "text-emerald-400",
+    bg: "bg-emerald-400/10",
+  },
+  "project.delete": {
+    icon: Trash,
+    color: "text-rose-400",
+    bg: "bg-rose-400/10",
+  },
+  "token.create": { icon: Key, color: "text-cyan-400", bg: "bg-cyan-400/10" },
+  "token.revoke": {
+    icon: ShieldAlert,
+    color: "text-rose-400",
+    bg: "bg-rose-400/10",
+  },
+  "auth.login": {
+    icon: Activity,
+    color: "text-slate-400",
+    bg: "bg-slate-400/10",
+  },
+  "auth.login.failed": {
+    icon: ShieldAlert,
+    color: "text-rose-400",
+    bg: "bg-rose-400/10",
+  },
 };
 
 export function RecentActivity() {
@@ -46,6 +86,19 @@ export function RecentActivity() {
     fetchLogs();
   }, []);
 
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.round(diffMs / 60000);
+    const diffHours = Math.round(diffMs / 3600000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins} minutes ago`;
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    return date.toLocaleDateString();
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -53,64 +106,93 @@ export function RecentActivity() {
       transition={{ delay: 0.3, duration: 0.5 }}
       className="h-full"
     >
-      <Card className="h-full overflow-hidden border-[rgb(var(--border))] bg-[rgb(var(--card))] shadow-sm">
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+      <Card className="h-full overflow-hidden border border-white/5 bg-[#1a1b26] shadow-xl">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-semibold text-white">
+            Recent Audit Logs
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {loading ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-12 w-full bg-[rgb(var(--muted))]/20 animate-pulse rounded-lg"
-                  />
+              <div className="space-y-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="flex gap-4">
+                    <div className="h-10 w-10 rounded-full bg-white/5 animate-pulse" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-3/4 rounded bg-white/5 animate-pulse" />
+                      <div className="h-3 w-1/2 rounded bg-white/5 animate-pulse" />
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : logs.length === 0 ? (
-              <p className="text-center text-[rgb(var(--muted-foreground))] text-sm py-4">
+              <p className="text-center text-slate-500 py-8">
                 No recent activity.
               </p>
             ) : (
               logs.map((log, i) => {
-                const Icon = actionIcons[log.action] || Activity;
-                const colorClass =
-                  actionColors[log.action] ||
-                  "bg-[rgb(var(--primary))]/10 text-[rgb(var(--primary))]";
+                const config = actionConfig[log.action] || {
+                  icon: Activity,
+                  color: "text-slate-400",
+                  bg: "bg-slate-400/10",
+                };
+                const Icon = config.icon;
 
                 return (
-                  <motion.div
-                    key={log._id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 + i * 0.1 }}
-                    className="flex items-start gap-4 p-3 rounded-lg hover:bg-[rgb(var(--muted))]/5 transition-colors"
-                  >
-                    <div className={`p-2 rounded-full ${colorClass}`}>
-                      <Icon className="h-4 w-4" />
+                  <div key={log._id} className="group relative flex gap-4">
+                    {/* Timeline Line */}
+                    {i !== logs.length - 1 && (
+                      <div className="absolute left-[19px] top-10 h-full w-[2px] bg-white/5 group-hover:bg-white/10 transition-colors" />
+                    )}
+
+                    <div
+                      className={cn(
+                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/5 transition-colors",
+                        config.bg,
+                        config.color,
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">
-                        <span className="font-bold">{log.user?.name}</span>{" "}
-                        {log.action.replace(/_/g, " ").toLowerCase()}
+
+                    <div className="pb-1">
+                      <p className="text-sm font-medium text-white">
+                        <span className="font-bold text-slate-200">
+                          {log.user?.name}
+                        </span>{" "}
+                        <span className="text-slate-400">
+                          {log.action.split(".").slice(1).join(" ")}
+                        </span>
+                        {log.metadata?.key && (
+                          <span className="text-blue-400">
+                            {" "}
+                            {log.metadata.key}
+                          </span>
+                        )}
                       </p>
-                      <p className="text-xs text-[rgb(var(--muted-foreground))] flex items-center gap-2">
-                        {new Date(log.timestamp).toLocaleString()}
+                      <p className="mt-0.5 text-xs text-slate-500 flex items-center gap-2">
+                        {formatTimeAgo(log.timestamp)}
                         {log.metadata?.target && (
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] px-1 py-0 h-4"
-                          >
-                            {log.metadata.target}
-                          </Badge>
+                          <>
+                            <span>•</span>
+                            <span className="text-slate-500">
+                              {log.metadata.target}
+                            </span>
+                          </>
                         )}
                       </p>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })
             )}
+
+            <Link href="/dashboard/audit" className="block w-full">
+              <div className="mt-4 rounded-lg border border-white/10 bg-white/5 py-2 text-center text-sm font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white">
+                View All Logs
+              </div>
+            </Link>
           </div>
         </CardContent>
       </Card>
