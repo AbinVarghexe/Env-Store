@@ -1,4 +1,4 @@
-const Project = require('../models/Project');
+const Project = require("../models/Project");
 
 /**
  * Role-Based Access Control middleware.
@@ -13,42 +13,42 @@ const requireRole = (...allowedRoles) => {
       const projectId = req.params.projectId || req.params.id;
 
       if (!projectId) {
-        return res.status(400).json({ error: 'Project ID is required' });
+        return res.status(400).json({ error: "Project ID is required" });
       }
 
       const project = await Project.findById(projectId);
 
       if (!project) {
-        return res.status(404).json({ error: 'Project not found' });
+        return res.status(404).json({ error: "Project not found" });
       }
 
       const isOwner = project.ownerId.toString() === req.user._id.toString();
 
-      if (isOwner && allowedRoles.includes('owner')) {
+      if (isOwner && allowedRoles.includes("owner")) {
         req.project = project;
-        req.userRole = 'owner';
+        req.userRole = "owner";
         return next();
       }
 
       const member = project.members.find(
-        (m) => m.userId.toString() === req.user._id.toString()
+        (m) => m.userId.toString() === req.user._id.toString(),
       );
 
       if (!member && !isOwner) {
-        return res.status(403).json({ error: 'Not a member of this project' });
+        return res.status(403).json({ error: "Not a member of this project" });
       }
 
-      const userRole = isOwner ? 'owner' : member.role;
+      const userRole = isOwner ? "owner" : member.role;
 
       if (!allowedRoles.includes(userRole)) {
-        return res.status(403).json({ error: 'Insufficient permissions' });
+        return res.status(403).json({ error: "Insufficient permissions" });
       }
 
       req.project = project;
       req.userRole = userRole;
       return next();
-    } catch (error) {
-      return res.status(500).json({ error: 'Authorization check failed' });
+    } catch (_error) {
+      return res.status(500).json({ error: "Authorization check failed" });
     }
   };
 };

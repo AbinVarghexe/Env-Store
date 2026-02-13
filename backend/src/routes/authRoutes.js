@@ -9,7 +9,6 @@ const {
   verifyAndEnableTwoFactor,
   disableTwoFactor,
   getMe,
-  searchUsers,
 } = require("../controllers/authController");
 const { authenticate } = require("../middleware/auth");
 const { validate, schemas } = require("../middleware/validate");

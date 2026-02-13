@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -5,7 +6,13 @@ import { useTheme } from "next-themes";
 import { Shield, Sun, Moon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
@@ -80,15 +87,21 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">Name</label>
-              <p className="text-sm text-[rgb(var(--muted-foreground))]">{user?.name}</p>
+              <p className="text-sm text-[rgb(var(--muted-foreground))]">
+                {user?.name}
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Email</label>
-              <p className="text-sm text-[rgb(var(--muted-foreground))]">{user?.email}</p>
+              <p className="text-sm text-[rgb(var(--muted-foreground))]">
+                {user?.email}
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Plan</label>
-              <Badge variant="secondary" className="capitalize">{user?.plan}</Badge>
+              <Badge variant="secondary" className="capitalize">
+                {user?.plan}
+              </Badge>
             </div>
           </CardContent>
         </Card>
@@ -100,7 +113,9 @@ export default function SettingsPage() {
               <Shield className="h-5 w-5" />
               Two-Factor Authentication
             </CardTitle>
-            <CardDescription>Add an extra layer of security to your account</CardDescription>
+            <CardDescription>
+              Add an extra layer of security to your account
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {user?.twoFactorEnabled ? (
@@ -111,7 +126,11 @@ export default function SettingsPage() {
                     Your account is protected with 2FA
                   </span>
                 </div>
-                <Button variant="destructive" size="sm" onClick={handleDisable2FA}>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDisable2FA}
+                >
                   Disable
                 </Button>
               </div>
@@ -119,7 +138,11 @@ export default function SettingsPage() {
               <div className="space-y-4">
                 {qrCode && (
                   <div className="flex flex-col items-center gap-4">
-                    <img src={qrCode} alt="2FA QR Code" className="w-48 h-48 rounded-lg" />
+                    <img
+                      src={qrCode}
+                      alt="2FA QR Code"
+                      className="w-48 h-48 rounded-lg"
+                    />
                     <p className="text-xs text-[rgb(var(--muted-foreground))] text-center">
                       Scan this QR code with your authenticator app
                     </p>
@@ -128,7 +151,9 @@ export default function SettingsPage() {
                         <p className="text-xs text-[rgb(var(--muted-foreground))] mb-1">
                           Or enter this key manually:
                         </p>
-                        <code className="text-sm font-mono break-all">{secret2FA}</code>
+                        <code className="text-sm font-mono break-all">
+                          {secret2FA}
+                        </code>
                       </div>
                     )}
                   </div>
@@ -142,7 +167,9 @@ export default function SettingsPage() {
 
                 <form onSubmit={handleVerify2FA} className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Verification Code</label>
+                    <label className="block text-sm font-medium mb-2">
+                      Verification Code
+                    </label>
                     <Input
                       type="text"
                       maxLength={6}
@@ -155,9 +182,17 @@ export default function SettingsPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button type="submit" disabled={loading2FA}>
-                      {loading2FA ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enable 2FA"}
+                      {loading2FA ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Enable 2FA"
+                      )}
                     </Button>
-                    <Button type="button" variant="ghost" onClick={() => setShowSetup2FA(false)}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setShowSetup2FA(false)}
+                    >
                       Cancel
                     </Button>
                   </div>
@@ -165,7 +200,9 @@ export default function SettingsPage() {
               </div>
             ) : (
               <Button onClick={handleSetup2FA} disabled={loading2FA}>
-                {loading2FA ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                {loading2FA ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
                 Set up 2FA
               </Button>
             )}

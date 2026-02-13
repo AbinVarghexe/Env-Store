@@ -141,7 +141,7 @@ const loginTwoFactor = async (req, res, next) => {
   }
 };
 
-const refreshAccessToken = async (req, res, next) => {
+const refreshAccessToken = async (req, res, _next) => {
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) {
@@ -165,7 +165,7 @@ const refreshAccessToken = async (req, res, next) => {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     });
-  } catch (error) {
+  } catch (_error) {
     return res.status(401).json({ error: "Invalid refresh token" });
   }
 };

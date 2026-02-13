@@ -2,7 +2,6 @@ const Project = require("../models/Project");
 const Secret = require("../models/Secret");
 const ApiToken = require("../models/ApiToken");
 const AuditLog = require("../models/AuditLog");
-const mongoose = require("mongoose");
 
 const getDashboardStats = async (req, res, next) => {
   try {
