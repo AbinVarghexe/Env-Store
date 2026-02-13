@@ -109,6 +109,16 @@ jobs:
           export GITHUB_REPOSITORY_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           docker compose push
 
+      - name: Ensure deployment directory exists
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            mkdir -p ${{ secrets.DEPLOY_PATH }}
+            ls -ld ${{ secrets.DEPLOY_PATH }}
+
       - name: Copy docker-compose to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -117,6 +127,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: "docker-compose.yml"
           target: ${{ secrets.DEPLOY_PATH }}
+          debug: true
 
       - name: Deploy on Server
         uses: appleboy/ssh-action@v1.2.0
