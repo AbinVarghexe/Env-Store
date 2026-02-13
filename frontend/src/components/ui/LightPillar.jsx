@@ -35,7 +35,7 @@ const LightPillar = ({
     const gl =
       canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
     if (!gl) {
-      setWebGLSupported(false);
+      setTimeout(() => setWebGLSupported(false), 0);
     }
   }, []);
 
@@ -103,7 +103,7 @@ const LightPillar = ({
         depth: false,
       });
     } catch (error) {
-      setWebGLSupported(false);
+      setTimeout(() => setWebGLSupported(false), 0);
       return;
     }
 
