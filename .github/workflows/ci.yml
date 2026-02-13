@@ -97,20 +97,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Lowercase Repo Owner for Docker Tags
-        run: |
-          echo "GITHUB_REPOSITORY_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >>${GITHUB_ENV}
-        env:
-          GITHUB_REPOSITORY_OWNER: '${{ github.repository_owner }}'
-
       - name: Build Images
         run: |
+          export GITHUB_REPOSITORY_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           docker compose build
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api' }}
 
       - name: Push Images
         run: |
+          export GITHUB_REPOSITORY_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           docker compose push
 
       - name: Copy docker-compose to server
@@ -128,11 +124,10 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          envs: GITHUB_REPOSITORY_OWNER
           script: |
             cd ${{ secrets.DEPLOY_PATH }}
+            export GITHUB_REPOSITORY_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            export GITHUB_REPOSITORY_OWNER=${GITHUB_REPOSITORY_OWNER}
             docker-compose pull
             docker-compose up -d
             docker image prune -f
