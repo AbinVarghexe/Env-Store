@@ -230,7 +230,7 @@ export default function LandingPage() {
               y: "-5%",
               transition: { type: "spring", stiffness: 200, damping: 25 },
             }}
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-20 cursor-pointer"
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-30 cursor-pointer"
           >
             <motion.div
               whileHover={{
@@ -297,6 +297,8 @@ export default function LandingPage() {
               </CardContent>
             </motion.div>
           </motion.div>
+          {/* Hero Bottom Fade */}
+          <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-b from-transparent to-[#0a0014] z-20 pointer-events-none" />
         </section>
 
         {/* Features */}
@@ -381,28 +383,38 @@ export default function LandingPage() {
               />
             </div>
           </div>
-          {/* Bottom Gradient Overlay */}
-          <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-blue-900/50 via-blue-900/10 to-transparent pointer-events-none z-20" />
+          {/* Bottom Gradient Overlay - Blend to next section color */}
+          <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-b from-transparent via-[#0a0014]/50 to-[#0a0014] z-20 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-blue-900/20 to-transparent z-20 pointer-events-none" />
         </section>
       </div>
       {/* End gradient wrapper */}
 
-      {/* How It Works */}
-      <section className="py-24 px-6 bg-[rgb(var(--secondary))]">
-        <div className="max-w-7xl mx-auto">
+      {/* Simple Secure Fast (Redesigned) */}
+      <section className="relative py-24 px-6 bg-[#0a0014] text-white">
+        {/* Top Gradient Blend */}
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-blue-900/40 via-blue-900/5 to-transparent pointer-events-none z-10" />
+        <div className="relative z-20 max-w-7xl mx-auto">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={stagger}
-            className="text-center mb-16"
+            className="mb-16 text-left"
           >
             <motion.h2
               variants={fadeInUp}
-              className="text-3xl md:text-4xl font-bold mb-4"
+              className="text-4xl md:text-5xl font-bold mb-4"
             >
-              Simple. Secure. Fast.
+              Simple. <span className="text-[#9595ff]">Secure.</span> Fast.
             </motion.h2>
+            <motion.p
+              variants={fadeInUp}
+              className="text-gray-400 max-w-2xl text-lg"
+            >
+              Everything you need to manage your environment variables with
+              confidence.
+            </motion.p>
           </motion.div>
 
           <motion.div
@@ -410,40 +422,82 @@ export default function LandingPage() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={stagger}
-            className="grid grid-cols-1 md:grid-cols-3 gap-10"
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {[
               {
                 step: "01",
+                time: "5 min setup",
                 title: "Create a Project",
                 desc: "Set up your project and choose environments.",
+                image:
+                  "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=350&fit=crop",
               },
               {
                 step: "02",
+                time: "Secure storage",
                 title: "Add Secrets",
                 desc: "Store API keys, tokens, and credentials securely.",
+                image:
+                  "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=350&fit=crop",
               },
               {
                 step: "03",
+                time: "Instant access",
                 title: "Access Anywhere",
-                desc: "Use the dashboard or API to retrieve secrets in your pipeline.",
+                desc: "Use the dashboard or API to retrieve secrets.",
+                image:
+                  "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=350&fit=crop",
               },
             ].map((item) => (
               <motion.div
                 key={item.step}
                 variants={fadeInUp}
-                className="text-center"
+                className="group relative bg-white/[0.03] rounded-3xl overflow-hidden hover:bg-white/[0.05] transition-colors border border-white/5"
               >
-                <div className="text-5xl font-bold text-[rgb(var(--primary))] mb-4 opacity-30">
-                  {item.step}
+                {/* Image */}
+                <div className="h-48 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0014] to-transparent opacity-60 z-10" />
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                <p className="text-[rgb(var(--muted-foreground))]">
-                  {item.desc}
-                </p>
+
+                {/* Content */}
+                <div className="p-6 relative z-20">
+                  <div className="flex items-center gap-2 text-xs font-mono text-[#9595ff] mb-3">
+                    <span>Step {item.step}</span>
+                    <span className="w-1 h-1 rounded-full bg-gray-500" />
+                    <span className="text-gray-400">{item.time}</span>
+                  </div>
+
+                  <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-[#9595ff] transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
               </motion.div>
             ))}
           </motion.div>
+
+          {/* Read More Button (Centered) */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="flex justify-center mt-12 relative z-30"
+          >
+            <button className="px-8 py-3 rounded-full bg-[#9595ff] text-white font-medium hover:bg-[#7a7aff] transition-colors shadow-lg shadow-[#9595ff]/20">
+              Read More
+            </button>
+          </motion.div>
+
+          {/* Bottom Fade to Pricing Section Color */}
+          <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-b from-transparent to-[#030303] pointer-events-none z-10" />
         </div>
       </section>
 
