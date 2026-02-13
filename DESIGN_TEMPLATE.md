@@ -8,7 +8,7 @@ Style: Developer-first, Clean, Secure, Calm
 
 # 1️⃣ Design Vision
 
-DevVault should feel:
+DevVault should feeel:
 
 - Secure
 - Calm
