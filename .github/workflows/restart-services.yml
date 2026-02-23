@@ -1,0 +1,83 @@
+name: Restart Services with Environment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  restart-services:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Stop Existing Containers and Start with Proper Environment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/devvault
+            
+            echo "Stopping existing containers..."
+            sudo docker compose down
+            
+            echo "Creating .env file with all secrets..."
+            cat > .env << 'EOL'
+            # Docker
+            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            
+            # Server
+            PORT=5000
+            NODE_ENV=production
+            
+            # Database
+            MONGODB_URI=${{ secrets.MONGODB_URI }}
+            REDIS_URL=${{ secrets.REDIS_URL }}
+            
+            # JWT
+            JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+            JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+            JWT_ACCESS_EXPIRY=15m
+            JWT_REFRESH_EXPIRY=7d
+            
+            # Encryption
+            ENCRYPTION_MASTER_KEY=${{ secrets.ENCRYPTION_MASTER_KEY }}
+            
+            # Frontend
+            FRONTEND_URL=http://${{ secrets.HOST }}
+            NEXT_PUBLIC_API_URL=http://${{ secrets.HOST }}/api
+            
+            # AWS MCP Server
+            AWS_REGION=${{ secrets.AWS_REGION }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            
+            # App
+            APP_NAME=DevVault
+            EOL
+            
+            echo "Logging into Docker Hub..."
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            
+            echo "Pulling latest images..."
+            sudo docker compose pull
+            
+            echo "Starting containers with environment variables..."
+            sudo docker compose up -d
+            
+            echo ""
+            echo "Waiting 10 seconds for containers to start..."
+            sleep 10
+            
+            echo ""
+            echo "=== Container Status ==="
+            sudo docker compose ps
+            
+            echo ""
+            echo "=== Testing Services ==="
+            curl -I http://localhost:3000 2>&1 | head -5 || echo "Frontend not ready yet"
+            curl -I http://localhost:5000 2>&1 | head -5 || echo "Backend not ready yet"
+            curl -I http://localhost 2>&1 | head -5 || echo "Nginx not ready yet"
+            
+            echo ""
+            echo "=== Recent Container Logs ==="
+            sudo docker compose logs --tail=30
