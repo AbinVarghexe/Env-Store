@@ -1,0 +1,73 @@
+name: Fix Nginx & Check EC2 Setup
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup-nginx:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check Docker Containers
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo "=== Docker Containers Status ==="
+            sudo docker ps
+            echo ""
+            echo "=== Docker Container Logs (last 20 lines each) ==="
+            cd ~/devvault
+            sudo docker compose logs --tail=20
+            
+      - name: Install and Configure Nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo "=== Installing Nginx ==="
+            sudo apt-get update
+            sudo apt-get install -y nginx
+            
+            echo "=== Copying Nginx Configuration ==="
+            cd ~/devvault
+            sudo cp nginx.conf /etc/nginx/sites-available/devvault
+            sudo ln -sf /etc/nginx/sites-available/devvault /etc/nginx/sites-enabled/devvault
+            sudo rm -f /etc/nginx/sites-enabled/default
+            
+            echo "=== Testing Nginx Configuration ==="
+            sudo nginx -t
+            
+            echo "=== Starting Nginx ==="
+            sudo systemctl enable nginx
+            sudo systemctl restart nginx
+            sudo systemctl status nginx
+            
+            echo "=== Checking if services are accessible ==="
+            curl -I http://localhost:3000 || echo "Frontend not responding"
+            curl -I http://localhost:5000 || echo "Backend not responding"
+            curl -I http://localhost || echo "Nginx not responding"
+            
+      - name: Security Group Check Instructions
+        run: |
+          echo "========================================="
+          echo "IMPORTANT: Check AWS Security Group"
+          echo "========================================="
+          echo ""
+          echo "If the site is still not accessible, ensure your EC2 Security Group allows:"
+          echo "  - Port 22 (SSH) from your IP or 0.0.0.0/0"
+          echo "  - Port 80 (HTTP) from 0.0.0.0/0"
+          echo ""
+          echo "To check/fix this:"
+          echo "1. Go to AWS Console → EC2 → Security Groups"
+          echo "2. Find the security group attached to your instance"
+          echo "3. Add Inbound Rules:"
+          echo "   - Type: HTTP, Port: 80, Source: 0.0.0.0/0"
+          echo "   - Type: SSH, Port: 22, Source: 0.0.0.0/0 (or your IP)"
+          echo ""
+          echo "Then test: http://54.209.186.198"
+          echo "========================================="
