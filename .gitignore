@@ -33,5 +33,9 @@ Thumbs.db
 # Docker
 *.tar
 
+# SSH Keys and certificates
+*.pem
+*.key
+
 .agents
 skills

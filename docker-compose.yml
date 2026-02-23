@@ -12,7 +12,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: ghcr.io/abinvarghexe/devvault-backend:latest
+    image: ${DOCKER_USERNAME}/devvault-backend:latest
     ports:
       - "5000:5000"
     environment:
@@ -38,13 +38,34 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000/api}
-    image: ghcr.io/abinvarghexe/devvault-frontend:latest
+    image: ${DOCKER_USERNAME}/devvault-frontend:latest
     ports:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5000/api}
     depends_on:
       - backend
+    restart: unless-stopped
+    networks:
+      - devvault-network
+
+  # AWS MCP Server
+  mcp-server:
+    image: public.ecr.aws/awslabs-mcp/awslabs/aws-api-mcp-server:latest
+    environment:
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - READ_OPERATIONS_ONLY=false
+    volumes:
+      - ~/.aws:/app/.aws:ro
+    # For HTTP mode (if the clients need to connect via HTTP rather than stdio locally)
+    # command: ["aws-api-mcp-server"]
+    # environment:
+    #   - AWS_API_MCP_TRANSPORT=streamable-http
+    #   - AUTH_TYPE=no-auth
+    # ports:
+    #   - "8000:8000"
     restart: unless-stopped
     networks:
       - devvault-network

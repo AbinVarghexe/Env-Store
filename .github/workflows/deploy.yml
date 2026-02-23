@@ -1,0 +1,105 @@
+name: CI/CD - Build & Deploy DevVault to AWS EC2
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Next.js & Backend Images
+        run: |
+          # Build Frontend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/devvault-frontend:latest ./frontend
+          
+          # Build Backend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/devvault-backend:latest ./backend
+          
+          # We'll use the pre-built awslabs image or build the specific server here if needed.
+          
+      - name: Push Images to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/devvault-frontend:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/devvault-backend:latest
+
+      - name: Ensure Server Setup (Install Docker & Compose)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo "Checking if Docker is installed..."
+            if ! command -v docker &> /dev/null; then
+              echo "Docker not found, installing..."
+              sudo apt-get remove -y docker docker-engine docker.io containerd runc 2>/dev/null
+              sudo apt-get update
+              sudo apt-get install -y ca-certificates curl gnupg lsb-release
+              sudo mkdir -p /etc/apt/keyrings
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+              
+              # Set up repo
+              echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+              
+              sudo apt-get update
+              sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+              sudo systemctl enable docker
+              sudo systemctl start docker
+              sudo usermod -aG docker ubuntu
+              
+              echo "Docker installed successfully! Note: You may need to reconnect for group changes to fully apply, but the script will continue."
+            else
+              echo "Docker is already installed."
+            fi
+            
+            # Setup deployment folder structure
+            mkdir -p ~/devvault
+            cd ~/devvault
+
+      - name: Copy docker-compose and configs to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "./docker-compose.yml,./nginx.conf,.env" # Note: .env shouldn't normally be copied like this in prod, it's better to use GH secrets directly in docker-compose, but doing it this way for simplicity as per current project setup
+          target: "~/devvault"
+
+      - name: Pull Images and Start Services
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/devvault
+            
+            # Required env variables for docker-compose based on current config
+            export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            export MONGODB_URI=${{ secrets.MONGODB_URI }}
+            export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+            # Add other necessary prod secrets from GH Secrets here!
+            
+            # Login to Docker to potentially bypass rate limits or if using private images
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            
+            echo "Pulling latest images..."
+            sudo docker compose pull
+            
+            echo "Starting containers..."
+            sudo docker compose up -d
+            
+            echo "Removing old dangling images to save space..."
+            sudo docker image prune -f
