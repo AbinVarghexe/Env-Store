@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "src/app/api/[...slug]/route.js": {
+      "maxDuration": 30
+    }
+  }
+}
