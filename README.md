@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/DevVault-Secrets%20Manager-6366f1?style=for-the-badge&logo=shield&logoColor=white" alt="DevVault" />
+  <img src="assets/banner.svg" alt="DevVault - Secure Secrets Manager" width="100%" />
 </p>
 
 <h1 align="center">🛡️ DevVault</h1>
